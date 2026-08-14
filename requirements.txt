@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+redis
+python-telegram-bot
+pydantic
