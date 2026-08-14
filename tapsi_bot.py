@@ -7,9 +7,9 @@ import asyncio
 import redis
 import io
 from datetime import datetime
-from typing import List
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware  # اضافه شده برای رفع خطای افزونه
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uvicorn
@@ -61,6 +61,15 @@ class TapsiData(BaseModel):
 # ======================== وب‌سرور FastAPI ========================
 app = FastAPI(title="Tapsi License API", docs_url=None, redoc_url=None)
 
+# تنظیمات امنیتی CORS برای رفع خطای Failed to fetch در افزونه مرورگر
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # اجازه ارسال درخواست از همه افزونه‌ها و سایت‌ها
+    allow_credentials=True,
+    allow_methods=["*"],  # اجازه به تمامی متدها (POST, GET و...)
+    allow_headers=["*"],
+)
+
 @app.post("/api/tapsi/create-license")
 async def create_tapsi_license(data: TapsiData):
     """این اندپوینت اطلاعات را از افزونه کروم می‌گیرد و لایسنس می‌سازد."""
@@ -95,7 +104,7 @@ async def create_tapsi_license(data: TapsiData):
                 f"🔑 لایسنس: `{license_key}`\n"
                 f"📱 شماره: `{data.phone_number}`\n"
                 f"⏰ زمان: `{now_str}`\n\n"
-                "✅ اطلاعات کوکی با موفقیت ذخیره شد."
+                "✅ اطلاعات نشست با موفقیت ذخیره شد."
             )
             await bot.send_message(chat_id=admin_id, text=msg, parse_mode='Markdown')
         except Exception as e:
@@ -243,4 +252,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
